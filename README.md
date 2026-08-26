@@ -7,28 +7,8 @@ A small local browser calculator for estimating the probability that each Figgie
 1. Download or copy the project folder.
 2. Extract it if it was downloaded as a ZIP file.
 3. Open `index.html` in a current web browser.
-4. Enter the four suit frequencies. Typing or pasting `5122` from the first field fills all four suits.
+4. Enter the four suit frequencies. Typing or pasting `1234` from the first field fills all four suits.
 5. Select **Calculate →** once the frequencies total 10.
-
-No installation, account, network connection, or API key is required.
-
-## Optional local server
-
-Directly opening `index.html` is supported. To serve the same files locally instead, run:
-
-```powershell
-python -m http.server 8000
-```
-
-Then open `http://localhost:8000`.
-
-## Tests
-
-Node.js is needed only to run the automated tests:
-
-```powershell
-node --test tests/calculator.test.js tests/app.test.js
-```
 
 ## Probability model
 
