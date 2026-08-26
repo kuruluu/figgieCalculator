@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#090d18">
+    <title>Figgie Calculator</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="src/calculator.js"></script>
+    <script defer src="src/app.js"></script>
+  </head>
+  <body>
+    <main class="calculator" aria-labelledby="page-title">
+      <header class="page-header">
+        <h1 id="page-title">Figgie Calculator</h1>
+        <p class="credit">by Enric Duong</p>
+      </header>
+
+      <section class="suit-grid" aria-label="Starting hand">
+        <article class="suit-card suit-card--black" data-suit="spades">
+          <div class="suit-heading">
+            <span class="suit-symbol" aria-hidden="true">♠</span>
+            <h2>Spades</h2>
+            <input class="frequency-input" id="spades-frequency" type="text" inputmode="numeric" pattern="[0-9]" maxlength="1" value="0" autocomplete="off" aria-label="Spades frequency" autofocus>
+          </div>
+          <input class="frequency-slider" id="spades-slider" type="range" min="0" max="9" step="1" value="0" aria-label="Spades frequency slider" aria-controls="spades-frequency">
+          <div class="results" aria-label="Spades probabilities">
+            <div><span>Goal</span><output data-result="goal">—</output></div>
+            <div><span>Rare</span><output data-result="rare">—</output></div>
+          </div>
+        </article>
+
+        <article class="suit-card suit-card--black" data-suit="clubs">
+          <div class="suit-heading">
+            <span class="suit-symbol" aria-hidden="true">♣</span>
+            <h2>Clubs</h2>
+            <input class="frequency-input" id="clubs-frequency" type="text" inputmode="numeric" pattern="[0-9]" maxlength="1" value="0" autocomplete="off" aria-label="Clubs frequency">
+          </div>
+          <input class="frequency-slider" id="clubs-slider" type="range" min="0" max="9" step="1" value="0" aria-label="Clubs frequency slider" aria-controls="clubs-frequency">
+          <div class="results" aria-label="Clubs probabilities">
+            <div><span>Goal</span><output data-result="goal">—</output></div>
+            <div><span>Rare</span><output data-result="rare">—</output></div>
+          </div>
+        </article>
+
+        <article class="suit-card suit-card--red" data-suit="hearts">
+          <div class="suit-heading">
+            <span class="suit-symbol" aria-hidden="true">♥</span>
+            <h2>Hearts</h2>
+            <input class="frequency-input" id="hearts-frequency" type="text" inputmode="numeric" pattern="[0-9]" maxlength="1" value="0" autocomplete="off" aria-label="Hearts frequency">
+          </div>
+          <input class="frequency-slider" id="hearts-slider" type="range" min="0" max="9" step="1" value="0" aria-label="Hearts frequency slider" aria-controls="hearts-frequency">
+          <div class="results" aria-label="Hearts probabilities">
+            <div><span>Goal</span><output data-result="goal">—</output></div>
+            <div><span>Rare</span><output data-result="rare">—</output></div>
+          </div>
+        </article>
+
+        <article class="suit-card suit-card--red" data-suit="diamonds">
+          <div class="suit-heading">
+            <span class="suit-symbol" aria-hidden="true">♦</span>
+            <h2>Diamonds</h2>
+            <input class="frequency-input" id="diamonds-frequency" type="text" inputmode="numeric" pattern="[0-9]" maxlength="1" value="0" autocomplete="off" aria-label="Diamonds frequency">
+          </div>
+          <input class="frequency-slider" id="diamonds-slider" type="range" min="0" max="9" step="1" value="0" aria-label="Diamonds frequency slider" aria-controls="diamonds-frequency">
+          <div class="results" aria-label="Diamonds probabilities">
+            <div><span>Goal</span><output data-result="goal">—</output></div>
+            <div><span>Rare</span><output data-result="rare">—</output></div>
+          </div>
+        </article>
+      </section>
+
+      <div class="action-row">
+        <output id="hand-total" class="hand-total" aria-live="polite">0 / 10</output>
+        <button id="calculate-button" class="calculate-button" type="button" disabled aria-disabled="true">
+          Calculate <span aria-hidden="true">→</span>
+        </button>
+      </div>
+      <p id="calculation-error" class="calculation-error" role="alert" hidden></p>
+
+      <section class="explanation" aria-label="About the calculator">
+        <article class="explanation-section">
+          <div>
+            <h2>How to use</h2>
+            <p>
+              Enter the frequency of each suit in your ten-card starting hand with the sliders, or type
+              all four digits in sequence. Once the total reaches ten, select Calculate to see the chance
+              that each suit is the Goal suit and the chance that it is the Rare suit.
+            </p>
+            <p>
+              A suit's chance of being Common equals its same-color partner's chance of being Goal:
+              Spades pairs with Clubs, and Hearts pairs with Diamonds.
+            </p>
+          </div>
+        </article>
+
+        <article class="explanation-section">
+          <div>
+            <h2>How probabilities are calculated</h2>
+            <p>
+              Consider the example hand <strong>5 / 2 / 3 / 0</strong> for Spades, Clubs, Hearts, and
+              Diamonds. The calculator compares that hand with all twelve possible Figgie decks, each
+              containing one 12-card Common suit, two 10-card suits, and one 8-card Rare suit.
+            </p>
+            <p>
+              For each possible deck, it counts how many ways the same 5 / 2 / 3 / 0 hand could be drawn.
+              Those counts become relative weights and are normalized to total 100%. A suit's Rare chance
+              sums the weights of decks where it has eight cards. Its Goal chance sums the weights of decks
+              where its same-color partner is the 12-card Common suit.
+            </p>
+
+            <div class="example-table-wrap">
+              <table>
+                <caption>Results for the 5 / 2 / 3 / 0 example hand</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Suit</th>
+                    <th scope="col">Held</th>
+                    <th scope="col">Goal</th>
+                    <th scope="col">Rare</th>
+                    <th scope="col">Common</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><th scope="row">Spades</th><td>5</td><td>18.03%</td><td>6.96%</td><td>47.80%</td></tr>
+                  <tr><th scope="row">Clubs</th><td>2</td><td>47.80%</td><td>27.07%</td><td>18.03%</td></tr>
+                  <tr><th scope="row">Hearts</th><td>3</td><td>9.55%</td><td>19.06%</td><td>24.62%</td></tr>
+                  <tr><th scope="row">Diamonds</th><td>0</td><td>24.62%</td><td>46.91%</td><td>9.55%</td></tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="rounding-note">Percentages are rounded to two decimal places.</p>
+          </div>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>
