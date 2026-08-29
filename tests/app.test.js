@@ -14,7 +14,30 @@ test("keeps the static shell compatible with direct local opening", function () 
   assert.match(html, /<script defer src="src\/app\.js"><\/script>/);
   assert.equal((html.match(/data-suit=/g) || []).length, 4);
   assert.doesNotMatch(html, /type=["']module["']/);
-  assert.doesNotMatch(html, /https?:\/\//);
+  assert.match(html, /href="https:\/\/www\.figgie\.com\/play\/"/);
+  assert.match(html, /target="_blank" rel="noopener noreferrer"/);
+  assert.doesNotMatch(html, /<(?:script|link)[^>]+https?:\/\//);
+});
+
+test("includes an accessible theme toggle and official game link", function () {
+  const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+
+  assert.match(html, /id="theme-toggle"/);
+  assert.match(html, /aria-label="Switch to light mode"/);
+  assert.match(html, /data-theme-label>Light</);
+  assert.match(html, />\s*Play Figgie\s*</);
+});
+
+test("keeps the cards and documentation in Spades Clubs Diamonds Hearts order", function () {
+  const html = fs.readFileSync(path.join(__dirname, "..", "index.html"), "utf8");
+  const readme = fs.readFileSync(path.join(__dirname, "..", "README.md"), "utf8");
+  const cardOrder = Array.from(html.matchAll(/data-suit="([^"]+)"/g), function readSuit(match) {
+    return match[1];
+  });
+
+  assert.deepEqual(cardOrder, ["spades", "clubs", "diamonds", "hearts"]);
+  assert.match(html, /for Spades, Clubs, Diamonds, and\s+Hearts/);
+  assert.match(readme, /The suit order is Spades, Clubs, Diamonds, Hearts\./);
 });
 
 test("includes the credit, relocated total, and two-part explanation", function () {
@@ -55,6 +78,16 @@ test("defines the approved dark theme and compact control invariants", function 
   assert.match(css, /\.suit-card\s*{[\s\S]*?border-radius:\s*8px;/);
   assert.match(css, /\.frequency-input\s*{[\s\S]*?border:\s*0;/);
   assert.match(css, /\.frequency-input\s*{[\s\S]*?background:\s*transparent;/);
+});
+
+test("defines a light theme while preserving the dark palette", function () {
+  const css = fs.readFileSync(path.join(__dirname, "..", "styles.css"), "utf8");
+
+  assert.match(css, /:root\[data-theme="light"\]/);
+  assert.match(css, /--page:\s*#f3f1f8/i);
+  assert.match(css, /@media\s*\(prefers-color-scheme:\s*light\)/);
+  assert.match(css, /\.header-actions\s*{/);
+  assert.match(css, /\.theme-toggle/);
 });
 
 test("uses a card-back pattern without numbered or divided explanation sections", function () {
@@ -134,4 +167,43 @@ test("formats probabilities with two decimal places", function () {
   assert.equal(app.formatPercent(0), "0.00%");
   assert.equal(app.formatPercent(0.12345), "12.35%");
   assert.equal(app.formatPercent(1), "100.00%");
+});
+
+test("normalizes and resolves stored themes safely", function () {
+  assert.equal(app.normalizeTheme("light"), "light");
+  assert.equal(app.normalizeTheme("dark"), "dark");
+  assert.equal(app.normalizeTheme("sepia"), null);
+
+  const storage = {
+    value: "light",
+    getItem: function getItem(key) {
+      assert.equal(key, app.THEME_STORAGE_KEY);
+      return this.value;
+    },
+    setItem: function setItem(key, value) {
+      assert.equal(key, app.THEME_STORAGE_KEY);
+      this.value = value;
+    },
+  };
+
+  assert.equal(app.readStoredTheme(storage), "light");
+  assert.equal(app.storeTheme(storage, "dark"), true);
+  assert.equal(app.readStoredTheme(storage), "dark");
+});
+
+test("theme storage failures fall back without throwing", function () {
+  const failingStorage = {
+    getItem: function getItem() {
+      throw new Error("unavailable");
+    },
+    setItem: function setItem() {
+      throw new Error("unavailable");
+    },
+  };
+
+  assert.equal(app.readStoredTheme(failingStorage), null);
+  assert.equal(app.storeTheme(failingStorage, "light"), false);
+  assert.equal(app.getSystemTheme({ matchMedia: function matchMedia() { return { matches: true }; } }), "light");
+  assert.equal(app.getSystemTheme({ matchMedia: function matchMedia() { return { matches: false }; } }), "dark");
+  assert.equal(app.getSystemTheme(null), "dark");
 });

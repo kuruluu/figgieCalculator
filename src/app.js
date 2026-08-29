@@ -14,6 +14,120 @@
 })(typeof globalThis !== "undefined" ? globalThis : this, function createAppModule(calculator) {
   "use strict";
 
+  const THEME_STORAGE_KEY = "figgie-theme";
+  const THEME_COLORS = Object.freeze({
+    dark: "#090d18",
+    light: "#f3f1f8",
+  });
+
+  function normalizeTheme(value) {
+    return value === "light" || value === "dark" ? value : null;
+  }
+
+  function getStorage(viewObject) {
+    try {
+      return viewObject && viewObject.localStorage ? viewObject.localStorage : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function readStoredTheme(storage) {
+    try {
+      return storage ? normalizeTheme(storage.getItem(THEME_STORAGE_KEY)) : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function storeTheme(storage, theme) {
+    try {
+      if (storage) {
+        storage.setItem(THEME_STORAGE_KEY, theme);
+      }
+      return true;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function getSystemTheme(viewObject) {
+    return viewObject && typeof viewObject.matchMedia === "function" &&
+      viewObject.matchMedia("(prefers-color-scheme: light)").matches
+      ? "light"
+      : "dark";
+  }
+
+  function createThemeController(documentObject, viewObject) {
+    const rootElement = documentObject.documentElement;
+    const toggleButton = documentObject.querySelector("#theme-toggle");
+    const themeColor = documentObject.querySelector('meta[name="theme-color"]');
+    const storage = getStorage(viewObject);
+    const storedTheme = readStoredTheme(storage);
+    const mediaQuery =
+      viewObject && typeof viewObject.matchMedia === "function"
+        ? viewObject.matchMedia("(prefers-color-scheme: light)")
+        : null;
+    let theme = storedTheme || getSystemTheme(viewObject);
+    let hasExplicitTheme = Boolean(storedTheme);
+
+    function renderTheme() {
+      rootElement.dataset.theme = theme;
+      if (themeColor) {
+        themeColor.setAttribute("content", THEME_COLORS[theme]);
+      }
+      if (toggleButton) {
+        const nextTheme = theme === "dark" ? "light" : "dark";
+        const label = toggleButton.querySelector("[data-theme-label]");
+        const icon = toggleButton.querySelector(".theme-toggle-icon");
+        toggleButton.setAttribute("aria-pressed", String(theme === "light"));
+        toggleButton.setAttribute("aria-label", "Switch to " + nextTheme + " mode");
+        if (label) {
+          label.textContent = nextTheme === "light" ? "Light" : "Dark";
+        }
+        if (icon) {
+          icon.textContent = nextTheme === "light" ? "☀" : "☾";
+        }
+      }
+    }
+
+    function setTheme(nextTheme, options) {
+      const normalized = normalizeTheme(nextTheme);
+      if (!normalized) {
+        return false;
+      }
+      theme = normalized;
+      hasExplicitTheme = !options || options.explicit !== false;
+      if (hasExplicitTheme) {
+        storeTheme(storage, theme);
+      }
+      renderTheme();
+      return true;
+    }
+
+    if (toggleButton) {
+      toggleButton.addEventListener("click", function toggleTheme() {
+        setTheme(theme === "dark" ? "light" : "dark");
+      });
+    }
+
+    if (mediaQuery && typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", function followSystemTheme(event) {
+        if (!hasExplicitTheme) {
+          setTheme(event.matches ? "light" : "dark", { explicit: false });
+        }
+      });
+    }
+
+    renderTheme();
+    return Object.freeze({
+      getTheme: function getTheme() {
+        return theme;
+      },
+      setTheme: setTheme,
+    });
+  }
+
   function createHandController(onChange) {
     let frequencies = [0, 0, 0, 0];
 
@@ -91,6 +205,7 @@
     const totalOutput = documentObject.querySelector("#hand-total");
     const calculateButton = documentObject.querySelector("#calculate-button");
     const errorOutput = documentObject.querySelector("#calculation-error");
+    createThemeController(documentObject, documentObject.defaultView);
     let hasResults = false;
 
     function clearResults() {
@@ -223,6 +338,12 @@
   }
 
   return Object.freeze({
+    THEME_STORAGE_KEY: THEME_STORAGE_KEY,
+    normalizeTheme: normalizeTheme,
+    readStoredTheme: readStoredTheme,
+    storeTheme: storeTheme,
+    getSystemTheme: getSystemTheme,
+    createThemeController: createThemeController,
     createHandController: createHandController,
     formatPercent: formatPercent,
     createApp: createApp,

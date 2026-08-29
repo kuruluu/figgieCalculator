@@ -6,6 +6,16 @@
     <meta name="theme-color" content="#090d18">
     <title>Figgie Calculator</title>
     <link rel="icon" href="data:,">
+    <script>
+      try {
+        const savedTheme = localStorage.getItem("figgie-theme");
+        if (savedTheme === "light" || savedTheme === "dark") {
+          document.documentElement.dataset.theme = savedTheme;
+        }
+      } catch (error) {
+        // Theme persistence is optional; the system preference remains the fallback.
+      }
+    </script>
     <link rel="stylesheet" href="styles.css">
     <script defer src="src/calculator.js"></script>
     <script defer src="src/app.js"></script>
@@ -13,8 +23,19 @@
   <body>
     <main class="calculator" aria-labelledby="page-title">
       <header class="page-header">
-        <h1 id="page-title">Figgie Calculator</h1>
-        <p class="credit">by Enric Duong</p>
+        <div class="page-brand">
+          <h1 id="page-title">Figgie Calculator</h1>
+          <p class="credit">by Enric Duong</p>
+        </div>
+        <div class="header-actions">
+          <a class="header-link" href="https://www.figgie.com/play/" target="_blank" rel="noopener noreferrer">
+            Play Figgie <span aria-hidden="true">↗</span>
+          </a>
+          <button id="theme-toggle" class="theme-toggle" type="button" aria-pressed="false" aria-label="Switch to light mode">
+            <span class="theme-toggle-icon" aria-hidden="true">☀</span>
+            <span data-theme-label>Light</span>
+          </button>
+        </div>
       </header>
 
       <section class="suit-grid" aria-label="Starting hand">
@@ -44,19 +65,6 @@
           </div>
         </article>
 
-        <article class="suit-card suit-card--red" data-suit="hearts">
-          <div class="suit-heading">
-            <span class="suit-symbol" aria-hidden="true">♥</span>
-            <h2>Hearts</h2>
-            <input class="frequency-input" id="hearts-frequency" type="text" inputmode="numeric" pattern="[0-9]" maxlength="1" value="0" autocomplete="off" aria-label="Hearts frequency">
-          </div>
-          <input class="frequency-slider" id="hearts-slider" type="range" min="0" max="9" step="1" value="0" aria-label="Hearts frequency slider" aria-controls="hearts-frequency">
-          <div class="results" aria-label="Hearts probabilities">
-            <div><span>Goal</span><output data-result="goal">—</output></div>
-            <div><span>Rare</span><output data-result="rare">—</output></div>
-          </div>
-        </article>
-
         <article class="suit-card suit-card--red" data-suit="diamonds">
           <div class="suit-heading">
             <span class="suit-symbol" aria-hidden="true">♦</span>
@@ -65,6 +73,19 @@
           </div>
           <input class="frequency-slider" id="diamonds-slider" type="range" min="0" max="9" step="1" value="0" aria-label="Diamonds frequency slider" aria-controls="diamonds-frequency">
           <div class="results" aria-label="Diamonds probabilities">
+            <div><span>Goal</span><output data-result="goal">—</output></div>
+            <div><span>Rare</span><output data-result="rare">—</output></div>
+          </div>
+        </article>
+
+        <article class="suit-card suit-card--red" data-suit="hearts">
+          <div class="suit-heading">
+            <span class="suit-symbol" aria-hidden="true">♥</span>
+            <h2>Hearts</h2>
+            <input class="frequency-input" id="hearts-frequency" type="text" inputmode="numeric" pattern="[0-9]" maxlength="1" value="0" autocomplete="off" aria-label="Hearts frequency">
+          </div>
+          <input class="frequency-slider" id="hearts-slider" type="range" min="0" max="9" step="1" value="0" aria-label="Hearts frequency slider" aria-controls="hearts-frequency">
+          <div class="results" aria-label="Hearts probabilities">
             <div><span>Goal</span><output data-result="goal">—</output></div>
             <div><span>Rare</span><output data-result="rare">—</output></div>
           </div>
@@ -99,8 +120,8 @@
           <div>
             <h2>How probabilities are calculated</h2>
             <p>
-              Consider the example hand <strong>5 / 2 / 3 / 0</strong> for Spades, Clubs, Hearts, and
-              Diamonds. The calculator compares that hand with all twelve possible Figgie decks, each
+              Consider the example hand <strong>5 / 2 / 3 / 0</strong> for Spades, Clubs, Diamonds, and
+              Hearts. The calculator compares that hand with all twelve possible Figgie decks, each
               containing one 12-card Common suit, two 10-card suits, and one 8-card Rare suit.
             </p>
             <p>
@@ -125,8 +146,8 @@
                 <tbody>
                   <tr><th scope="row">Spades</th><td>5</td><td>18.03%</td><td>6.96%</td><td>47.80%</td></tr>
                   <tr><th scope="row">Clubs</th><td>2</td><td>47.80%</td><td>27.07%</td><td>18.03%</td></tr>
-                  <tr><th scope="row">Hearts</th><td>3</td><td>9.55%</td><td>19.06%</td><td>24.62%</td></tr>
-                  <tr><th scope="row">Diamonds</th><td>0</td><td>24.62%</td><td>46.91%</td><td>9.55%</td></tr>
+                  <tr><th scope="row">Diamonds</th><td>3</td><td>9.55%</td><td>19.06%</td><td>24.62%</td></tr>
+                  <tr><th scope="row">Hearts</th><td>0</td><td>24.62%</td><td>46.91%</td><td>9.55%</td></tr>
                 </tbody>
               </table>
             </div>

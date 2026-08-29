@@ -34,4 +34,4 @@ node --test tests/calculator.test.js tests/app.test.js
 
 The calculator evaluates all 12 assignments of Figgie's `12, 10, 10, 8` suit counts. It weights each assignment by the multivariate-hypergeometric likelihood of the entered hand, normalizes those weights, and sums them to produce each suit's goal and rare probabilities.
 
-The suit order is Spades, Clubs, Hearts, Diamonds. The goal suit is the same-color partner of the 12-card suit, and the rare suit is the 8-card suit.
+The suit order is Spades, Clubs, Diamonds, Hearts. The goal suit is the same-color partner of the 12-card suit, and the rare suit is the 8-card suit.

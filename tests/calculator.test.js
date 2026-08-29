@@ -6,6 +6,10 @@ const calculator = require("../src/calculator.js");
 
 const TOLERANCE = 1e-12;
 
+test("uses the visible Spades Clubs Diamonds Hearts suit order", function () {
+  assert.deepEqual(calculator.SUITS, ["spades", "clubs", "diamonds", "hearts"]);
+});
+
 function totalFor(results, key) {
   return calculator.SUITS.reduce(function add(sum, suit) {
     return sum + results[suit][key];

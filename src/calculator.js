@@ -9,7 +9,7 @@
 })(typeof globalThis !== "undefined" ? globalThis : this, function createCalculator() {
   "use strict";
 
-  const SUITS = Object.freeze(["spades", "clubs", "hearts", "diamonds"]);
+  const SUITS = Object.freeze(["spades", "clubs", "diamonds", "hearts"]);
   const PARTNER_INDEX = Object.freeze([1, 0, 3, 2]);
 
   const DECK_HYPOTHESES = Object.freeze(
